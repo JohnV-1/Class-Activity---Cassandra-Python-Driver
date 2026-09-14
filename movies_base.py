@@ -27,7 +27,7 @@ genre TEXT,
 rating FLOAT,
 director TEXT,
 PRIMARY KEY (genre, rating,movie_id)
-)
+)WITH CLUSTERING ORDER BY (rating DESC)
 """
 INSERT_MOVIE_TITLE = """
 INSERT INTO movie_by_title
@@ -41,10 +41,26 @@ INSERT INTO movie_by_genre
     genre, rating)
 VALUES (?, ?, ?, ?, ?, ?)
 """
-DELETE_MOVIE_TITLE = ""
+DELETE_MOVIE_TITLE = "Drop table movie_by_genre"
 DELETE_MOVIE_GENRE = ""
 SELECT_BY_TITLE = "SELECT * FROM movie_by_title WHERE title = ? AND release_year = ?"
 SELECT_BY_GENRE = "SELECT * FROM movie_by_genre WHERE genre = ? "
+
+UPDATE_BY_TITLE="""
+UPDATE movie_by_title 
+SET director = ?
+WHERE title = ? 
+"""
+
+
+UPDATE_BY_GENRE="""
+UPDATE movie_by_genre 
+SET director = ?
+WHERE genre = ?
+"""
+
+
+
 
 # ==============================
 # Funciones base
@@ -87,9 +103,15 @@ def query_by_genre(session, genre):
 
 
 def update_movie_director(session, title, genre, new_director):
+    movie_id = uuid.uuid4()
+    stmt = session.prepare(UPDATE_BY_TITLE)
+    session.execute(stmt, (new_director, title))
+    stmt = session.prepare(UPDATE_BY_GENRE)
+    session.execute(stmt, (new_director, genre))
     pass  
 
 def delete_movie(session, title, genre, rating, release_year):
+    session.execute(DELETE_MOVIE_TITLE)
     pass
 # ==============================
 # Menú
