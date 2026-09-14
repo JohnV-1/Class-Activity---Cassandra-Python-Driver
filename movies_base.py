@@ -29,23 +29,53 @@ director TEXT,
 PRIMARY KEY (genre, rating,movie_id)
 )
 """
-INSERT_MOVIE_TITLE = ""
-INSERT_MOVIE_GENRE = ""
+INSERT_MOVIE_TITLE = """
+INSERT INTO movie_by_title
+    (movie_id, title, release_year, director,
+        genre, rating)
+VALUES (?, ?, ?, ?, ?, ?)
+"""
+INSERT_MOVIE_GENRE = """
+INSERT INTO movie_by_genre
+    (movie_id, title, release_year, director,
+    genre, rating)
+VALUES (?, ?, ?, ?, ?, ?)
+"""
 DELETE_MOVIE_TITLE = ""
 DELETE_MOVIE_GENRE = ""
-SELECT_BY_TITLE = ""
+SELECT_BY_TITLE = "SELECT * FROM movie_by_genre"
 SELECT_BY_GENRE = ""
 
 # ==============================
 # Funciones base
 # ==============================
 def create_keyspace_and_tables(session):
-    pass  
+    session.execute(CREATE_KEYSPACE)
+    session.set_keyspace("movies")
+    print("Keyspace movies seleccionado")
+    stmt = session.prepare(CREATE_TABLE_MOVIE_BY_TITLE)
+    session.execute(stmt)
+    print("Tabla movie_by_title creada")
+    stmt = session.prepare(CREATE_TABLE_MOVIE_BY_GENRE)
+    session.execute(stmt)
+    print("Tabla movie_by_genre creada")
+    pass 
 
 def insert_movie(session, title, year, director, genre, rating):
+    movie_id = uuid.uuid4()
+    stmt = session.prepare(INSERT_MOVIE_TITLE)
+    session.execute(stmt, (movie_id, title, year, director, genre, rating))
+    stmt = session.prepare(INSERT_MOVIE_GENRE)
+    session.execute(stmt, (movie_id, title, year, director, genre, rating))
+    print("Canción insertada")
     pass  
 
 def query_by_title(session, title, year):
+    stmt = session.prepare(SELECT_BY_TITLE)
+    rows = session.execute(stmt)   
+    print("Todo jalando al 100 en esta consulta viejon") 
+    for r in rows:
+        print(r.title)
     pass  
 
 def query_by_genre(session, genre):
