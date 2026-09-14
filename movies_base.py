@@ -3,7 +3,10 @@ import uuid
 # ==============================
 # CQL Statements
 # ==============================
-CREATE_KEYSPACE = ""
+CREATE_KEYSPACE = """
+CREATE KEYSPACE IF NOT EXISTS movies
+WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}
+"""
 CREATE_TABLE_MOVIE_BY_TITLE = ""
 CREATE_TABLE_MOVIE_BY_GENRE = ""
 INSERT_MOVIE_TITLE = ""
