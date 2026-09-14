@@ -43,8 +43,8 @@ VALUES (?, ?, ?, ?, ?, ?)
 """
 DELETE_MOVIE_TITLE = ""
 DELETE_MOVIE_GENRE = ""
-SELECT_BY_TITLE = "SELECT * FROM movie_by_genre"
-SELECT_BY_GENRE = ""
+SELECT_BY_TITLE = "SELECT * FROM movie_by_title WHERE title = ? AND release_year = ?"
+SELECT_BY_GENRE = "SELECT * FROM movie_by_genre WHERE genre = ? "
 
 # ==============================
 # Funciones base
@@ -67,19 +67,24 @@ def insert_movie(session, title, year, director, genre, rating):
     session.execute(stmt, (movie_id, title, year, director, genre, rating))
     stmt = session.prepare(INSERT_MOVIE_GENRE)
     session.execute(stmt, (movie_id, title, year, director, genre, rating))
-    print("Canción insertada")
     pass  
 
 def query_by_title(session, title, year):
     stmt = session.prepare(SELECT_BY_TITLE)
-    rows = session.execute(stmt)   
-    print("Todo jalando al 100 en esta consulta viejon") 
+    rows = session.execute(stmt,(title, year))   
     for r in rows:
-        print(r.title)
+        print("-------Pelicula---------")
+        print(f"TItulo: {r.title}\nAño de estreno: {r.release_year}")
     pass  
 
 def query_by_genre(session, genre):
+    stmt = session.prepare(SELECT_BY_GENRE)
+    rows = session.execute(stmt,(genre,))  
+    print(f"\nGenero: {genre}") 
+    for r in rows:
+        print(f"Pelicula: {r.title} - {r.rating}")
     pass  
+
 
 def update_movie_director(session, title, genre, new_director):
     pass  
