@@ -54,14 +54,13 @@ SELECT_BY_GENRE = "SELECT * FROM movie_by_genre WHERE genre = ? "
 UPDATE_BY_TITLE="""
 UPDATE movie_by_title 
 SET director = ?
-WHERE title = ? 
+WHERE title = ? AND release_year = ?
 """
-
 
 UPDATE_BY_GENRE="""
 UPDATE movie_by_genre 
 SET director = ?
-WHERE genre = ?
+WHERE genre = ? AND rating = ? AND movie_id = ?
 """
 
 
@@ -107,13 +106,20 @@ def query_by_genre(session, genre):
     pass  
 
 
-def update_movie_director(session, title, genre, new_director):
-    movie_id = uuid.uuid4()
-    stmt = session.prepare(UPDATE_BY_TITLE)
-    session.execute(stmt, (new_director, title))
-    stmt = session.prepare(UPDATE_BY_GENRE)
-    session.execute(stmt, (new_director, genre))
-    pass  
+def update_movie_director(session, title, year, new_director):
+    select_query = "SELECT genre, rating, movie_id FROM movie_by_title WHERE title = %s AND release_year = %s"
+    row = session.execute(select_query, (title, year)).one()
+    genre = row.genre
+    rating = row.rating
+    movie_id = row.movie_id
+
+    stmt_title = session.prepare(UPDATE_BY_TITLE)
+    session.execute(stmt_title, (new_director, title, year))
+
+    stmt_genre = session.prepare(UPDATE_BY_GENRE)
+    session.execute(stmt_genre, (new_director, genre, rating, movie_id))
+    
+    print(f"\nEl director fue actualizado a '{new_director}' en ambas tablas.")
 
 def delete_movie(session, title, genre, rating, release_year):
     stmt = session.prepare(DELETE_MOVIE_TITLE)
@@ -157,9 +163,9 @@ def main():
             query_by_genre(session, genre)
         elif choice == "4":
             title = input("Título: ")
-            genre = input("Género: ")
+            year = int(input("Año: "))
             new_director = input("Nuevo Director: ")
-            update_movie_director(session, title, genre, new_director)
+            update_movie_director(session, title, year, new_director)
         elif choice == "5":
             # Eliminar de movie_by_title -> title, release_year
             # Eliminar de movie_by_genre -> genre, rating
