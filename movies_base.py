@@ -1,5 +1,6 @@
 from cassandra.cluster import Cluster
 import uuid
+import sys
 # ==============================
 # CQL Statements
 # ==============================
@@ -160,6 +161,9 @@ def main():
             delete_movie(session, title, genre, rating, release_year)
         elif choice == '0':
             # Cerrar conexión y salir
+            cluster.shutdown()
+            print("Sesión finalizada")
+            sys.exit()
             pass
         else:
             print("Opción inválida")
