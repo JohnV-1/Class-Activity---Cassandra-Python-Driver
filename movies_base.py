@@ -42,8 +42,12 @@ INSERT INTO movie_by_genre
     genre, rating)
 VALUES (?, ?, ?, ?, ?, ?)
 """
-DELETE_MOVIE_TITLE = "Drop table movie_by_genre"
-DELETE_MOVIE_GENRE = ""
+DELETE_MOVIE_TITLE = "DELETE FROM movie_by_title WHERE title= ? AND release_year= ?"
+
+
+DELETE_MOVIE_GENRE = "DELETE FROM movie_by_genre WHERE genre= ? AND rating= ?"
+
+
 SELECT_BY_TITLE = "SELECT * FROM movie_by_title WHERE title = ? AND release_year = ?"
 SELECT_BY_GENRE = "SELECT * FROM movie_by_genre WHERE genre = ? "
 
@@ -112,7 +116,11 @@ def update_movie_director(session, title, genre, new_director):
     pass  
 
 def delete_movie(session, title, genre, rating, release_year):
-    session.execute(DELETE_MOVIE_TITLE)
+    stmt = session.prepare(DELETE_MOVIE_TITLE)
+    session.execute(stmt, (title, release_year))
+    stmt = session.prepare(DELETE_MOVIE_GENRE)
+    session.execute(stmt, (genre, rating))
+    print(f"Pelicula: {title} eliminada")
     pass
 # ==============================
 # Menú
@@ -129,6 +137,7 @@ def main():
         print("2. Consultar por título")
         print("3. Consultar por género")
         print("4. Actualizar director")
+        print("5. Eliminar pelicula")
         print("0. Salir")
         choice = input("Seleccione opción: ")
 
@@ -156,8 +165,8 @@ def main():
             # Eliminar de movie_by_genre -> genre, rating
             title = input("Título: ")
             genre = input("Género: ")
-            rating = input("Rating: ")
-            release_year = input("Año: ")
+            rating = float(input("Rating: ")) 
+            release_year = int(input("Año: ")) 
             delete_movie(session, title, genre, rating, release_year)
         elif choice == '0':
             # Cerrar conexión y salir
