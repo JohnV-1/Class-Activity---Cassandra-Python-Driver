@@ -107,19 +107,17 @@ def query_by_genre(session, genre):
 
 
 def update_movie_director(session, title, year, new_director):
-    select_query = "SELECT genre, rating, movie_id FROM movie_by_title WHERE title = %s AND release_year = %s"
-    row = session.execute(select_query, (title, year)).one()
-    genre = row.genre
-    rating = row.rating
-    movie_id = row.movie_id
-
-    stmt_title = session.prepare(UPDATE_BY_TITLE)
-    session.execute(stmt_title, (new_director, title, year))
-
-    stmt_genre = session.prepare(UPDATE_BY_GENRE)
-    session.execute(stmt_genre, (new_director, genre, rating, movie_id))
-    
+    stmt = session.prepare(SELECT_BY_TITLE)
+    rows = session.execute(stmt,(title, year))  
+    for r in rows:
+            print(f"Antiguo director {r.director}")
+         
+    stmt = session.prepare(UPDATE_BY_GENRE)
+    session.execute(stmt, (new_director, r.genre, r.rating, r.movie_id))
+    stmt = session.prepare(UPDATE_BY_TITLE)
+    session.execute(stmt, (new_director, title, year))
     print(f"\nEl director fue actualizado a '{new_director}' en ambas tablas.")
+    pass
 
 def delete_movie(session, title, genre, rating, release_year):
     stmt = session.prepare(DELETE_MOVIE_TITLE)
